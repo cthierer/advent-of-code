@@ -1,13 +1,18 @@
-import type { LockState } from './LockState.mts'
+import type LockState from './LockState.mts'
 
 const rotateRight = (distance: number) =>
   Object.defineProperty(
-    ({ position, minValue, maxValue }: LockState): number => {
-      const nextPosition = position + distance
-      if (nextPosition > maxValue) {
-        return minValue + (nextPosition % (maxValue + 1))
+    (state: LockState): LockState => {
+      const { position, minValue, maxValue } = state
+      const upperBound = maxValue + 1
+      const delta = position + distance
+      const nextPosition = minValue + (delta % upperBound)
+      const numRotations = 0 // TODO
+      return {
+        ...state,
+        position: nextPosition,
+        rotations: state.rotations + numRotations,
       }
-      return nextPosition
     },
     'name',
     {

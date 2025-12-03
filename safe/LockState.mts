@@ -1,5 +1,8 @@
-export type LockState = {
+interface LockState {
   position: number
-  minValue: number
-  maxValue: number
+  rotations: number
+  readonly minValue: number
+  readonly maxValue: number
 }
+
+export default LockState

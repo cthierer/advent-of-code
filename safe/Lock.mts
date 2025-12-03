@@ -1,24 +1,24 @@
 import EventEmitter from 'node:events'
-import type { LockState } from './LockState.mts'
+import type LockState from './LockState.mts'
 
-export type Transform = (state: LockState) => number
+export type Transform = (state: LockState) => LockState
 
 type Unsubscribe = () => void
 
-type RotationHandler = (
-  transform: Transform,
-  prevState: LockState,
-  nextState: LockState,
-) => void
+type RotationHandler = (transform: Transform, prevState: LockState, nextState: LockState) => void
+
+const EventRotated = 'rotated'
 
 interface LockEvents {
-  rotated: [transform: Transform, prevState: LockState, nextState: LockState]
+  [EventRotated]: [transform: Transform, prevState: LockState, nextState: LockState]
 }
 
-class Lock {
-  private position: number = 0
+class Lock implements LockState {
+  private currentPosition: number = 0
 
-  private emitter: EventEmitter<LockEvents> = new EventEmitter()
+  private numRotations: number = 0
+
+  private readonly emitter: EventEmitter<LockEvents> = new EventEmitter()
 
   readonly minValue: number = 0
 
@@ -26,33 +26,41 @@ class Lock {
 
   constructor(maxValue: number, startingPosition: number) {
     this.maxValue = maxValue
-    this.position = startingPosition
+    this.currentPosition = startingPosition
   }
 
-  get currentPosition(): number {
-    const { position } = this
+  get position(): number {
+    const { currentPosition: position } = this
     return position
   }
 
+  get rotations(): number {
+    const { numRotations: rotations } = this
+    return rotations
+  }
+
   private get state(): LockState {
-    const { position, minValue, maxValue } = this
-    return { position, minValue, maxValue }
+    const { position, rotations, minValue, maxValue } = this
+    return { position, rotations, minValue, maxValue }
+  }
+
+  private set state(nextState: LockState) {
+    const { position, rotations } = nextState
+    this.currentPosition = position
+    this.numRotations = rotations
   }
 
   rotate(transform: Transform) {
     const { state: prevState } = this
-    const nextPosition = transform(prevState)
-
-    this.position = nextPosition
-
-    const { state: nextState } = this
-    this.emitter.emit('rotated', transform, prevState, nextState)
+    const nextState = transform(prevState)
+    this.state = nextState
+    this.emitter.emit(EventRotated, transform, prevState, nextState)
   }
 
   onRotate(handler: RotationHandler): Unsubscribe {
-    this.emitter.addListener('rotated', handler)
+    this.emitter.addListener(EventRotated, handler)
     return () => {
-      this.emitter.removeListener('rotated', handler)
+      this.emitter.removeListener(EventRotated, handler)
     }
   }
 }
