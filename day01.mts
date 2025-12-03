@@ -40,8 +40,6 @@ const main = async (input: Readable) => {
     if (position === 0) {
       numZeroes += 1
     }
-
-    numZeroes += numRotations
   })
 
   for await (const line of scanLines(input)) {
@@ -51,6 +49,7 @@ const main = async (input: Readable) => {
 
   console.log('Final value:', lock.position)
   console.log('Num. zeros:', numZeroes)
+  console.log('Num. passes over zero:', lock.rotations)
 }
 
 main(process.stdin)

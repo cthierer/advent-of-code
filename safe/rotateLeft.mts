@@ -1,17 +1,23 @@
+import rotatingSequence from '../util/rotatingSequence.mts'
 import type LockState from './LockState.mts'
 
 const rotateLeft = (distance: number) =>
   Object.defineProperty(
     (state: LockState): LockState => {
-      const { position, minValue, maxValue } = state
-      const delta = position - distance
-      const upperBound = maxValue + 1
-      const nextPosition = minValue + (((delta % upperBound) + upperBound) % upperBound)
-      const numRotations = 0 // TODO
+      const { position: startPosition, rotations: startRotations, minValue, maxValue } = state
+
+      let position = startPosition
+      let rotations = startRotations
+      for (position of rotatingSequence(minValue, maxValue, startPosition, distance, -1)) {
+        if (position === 0) {
+          rotations += 1
+        }
+      }
+
       return {
         ...state,
-        position: nextPosition,
-        rotations: state.rotations + numRotations,
+        position,
+        rotations,
       }
     },
     'name',
