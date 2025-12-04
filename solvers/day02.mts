@@ -1,4 +1,5 @@
 import scanReadable from '../util/scanReadable.mts'
+import { sum } from '../util/numbers.mts'
 
 const parseRange = (from: string): [number, number] => {
   const [startStr, endStr] = from.split('-', 2)
@@ -63,8 +64,6 @@ const hasNRepeats = (value: number): boolean => {
 
   return false
 }
-
-const sum = (val1: number, val2: number): number => val1 + val2
 
 try {
   let totalMethod1 = 0
