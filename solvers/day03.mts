@@ -15,7 +15,7 @@ try {
   let totalOutputJoltage = 0
   for await (const line of scanReadable(process.stdin, '\n')) {
     const batteryBank = new BatteryBank(nextId++, parseLine(line))
-    const maxJoltage = batteryBank.maxJoltage(2)
+    const maxJoltage = batteryBank.maxJoltage(12)
 
     console.log('Max. joltage for battery bank %s = %d', batteryBank.id, maxJoltage)
     totalOutputJoltage += maxJoltage
