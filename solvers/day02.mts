@@ -1,7 +1,7 @@
 import scanReadable from '../util/scanReadable.mts'
 
 const parseRange = (from: string): [number, number] => {
-  const [startStr,endStr] = from.split('-',2)
+  const [startStr, endStr] = from.split('-', 2)
   const start = Number.parseInt(startStr, 10)
   if (Number.isNaN(start)) {
     throw new Error(`invalid start value: "${startStr}"`)
@@ -13,10 +13,14 @@ const parseRange = (from: string): [number, number] => {
   return [start, end]
 }
 
-const filterRange = (start: number, end: number, predicate: ((value: number) => boolean)): number[] => {
+const filterRange = (
+  start: number,
+  end: number,
+  predicate: (value: number) => boolean,
+): number[] => {
   let matching: number[] = []
 
-  for(let i = start; i <= end; i++) {
+  for (let i = start; i <= end; i++) {
     if (predicate(i)) {
       matching = [...matching, i]
     }

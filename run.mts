@@ -9,7 +9,10 @@ const solverScripts = (await readdir(solverPath)).map(file => file.split('.', 1)
 
 const [, , solver, ...args] = process.argv
 if (!solver) {
-  console.error('Missing argument: solver\nPlease specify the solver you would like to run.\nAvailable solvers: %s', solverScripts.join(', '))
+  console.error(
+    'Missing argument: solver\nPlease specify the solver you would like to run.\nAvailable solvers: %s',
+    solverScripts.join(', '),
+  )
   process.exit(-1)
 }
 
@@ -45,5 +48,3 @@ child.on('exit', code => {
 
   console.log('Done!')
 })
-
-
