@@ -25,7 +25,7 @@ const filterRange = (start: number, end: number, predicate: ((value: number) => 
   return matching
 }
 
-const isInvalidId = (value: number): boolean => {
+const hasTwoRepeats = (value: number): boolean => {
   const asString = String(value)
   const numDigits = asString.length
   if (numDigits % 2 !== 0) {
@@ -38,16 +38,44 @@ const isInvalidId = (value: number): boolean => {
   return firstHalf === secondHalf
 }
 
+const hasNRepeats = (value: number): boolean => {
+  const asString = String(value)
+  const maxLength = Math.floor(asString.length / 2)
+
+  for (let length = 1; length <= maxLength; length++) {
+    const searchFor = asString.substring(0, length)
+    let repeats = true
+    for (let i = length; i < asString.length; i += length) {
+      const matchAgainst = asString.substring(i, i + length)
+      repeats = repeats && searchFor === matchAgainst
+      if (!repeats) {
+        break
+      }
+    }
+    if (repeats) {
+      return true
+    }
+  }
+
+  return false
+}
+
 const sum = (val1: number, val2: number): number => val1 + val2
 
 try {
-  let total = 0
+  let totalMethod1 = 0
+  let totalMethod2 = 0
   for await (const range of scanReadable(process.stdin, ',')) {
     const [start, end] = parseRange(range)
-    const invalidIds = filterRange(start, end, isInvalidId)
-    total = invalidIds.reduce(sum, total)
+
+    const twoRepeats = filterRange(start, end, hasTwoRepeats)
+    totalMethod1 = twoRepeats.reduce(sum, totalMethod1)
+
+    const nRepeats = filterRange(start, end, hasNRepeats)
+    totalMethod2 = nRepeats.reduce(sum, totalMethod2)
   }
-  console.log("Sum of invalid IDs: %d", total)
+  console.log('Sum of invalid IDs (method 1): %d', totalMethod1)
+  console.log('Sum of invalid IDs (method 2): %d', totalMethod2)
 } catch (err) {
   console.error('Error processing file: %s', err instanceof Error ? err.message : String(err))
   process.exit(-1)
