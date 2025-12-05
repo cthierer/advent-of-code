@@ -52,7 +52,7 @@ try {
   console.log('Total rolls removed: %d', totalRemoved)
 } catch (err) {
   console.error(
-    'Error processing input: %s',
+    'Error processing: %s',
     err instanceof Error ? `${err.message}\n${err.stack}` : String(err),
   )
   process.exit(-1)

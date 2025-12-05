@@ -50,6 +50,9 @@ try {
   console.log('Num. zeros:', numZeroes)
   console.log('Num. passes over zero:', lock.rotations)
 } catch (err) {
-  console.error('Error processing input: %s', err instanceof Error ? err.message : String(err))
+  console.error(
+    'Error processing: %s',
+    err instanceof Error ? `${err.message}\n${err.stack}` : String(err),
+  )
   process.exit(-1)
 }

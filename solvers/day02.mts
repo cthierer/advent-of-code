@@ -80,6 +80,9 @@ try {
   console.log('Sum of invalid IDs (method 1): %d', totalMethod1)
   console.log('Sum of invalid IDs (method 2): %d', totalMethod2)
 } catch (err) {
-  console.error('Error processing file: %s', err instanceof Error ? err.message : String(err))
+  console.error(
+    'Error processing: %s',
+    err instanceof Error ? `${err.message}\n${err.stack}` : String(err),
+  )
   process.exit(-1)
 }
