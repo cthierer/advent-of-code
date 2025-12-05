@@ -6,7 +6,7 @@ const rotatingSequence = function* (
   modifier: number,
 ) {
   let current = startAt
-  for (let i = 0; i < steps; i += Math.abs(modifier)) {
+  for (let i = 0; i < steps; i += 1) {
     let next = current + modifier
 
     if (next < min) {
