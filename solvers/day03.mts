@@ -2,13 +2,14 @@ import scanReadable from '../util/scanReadable.mts'
 import Battery from '../power/Battery.mts'
 import BatteryBank from '../power/BatteryBank.mts'
 
-const parseLine = (line: string): Battery[] => Array.from(line).map((battery: string) => {
-  const joltage = Number.parseInt(battery, 10)
-  if (Number.isNaN(joltage)) {
-    throw new Error(`invalid joltage: "${battery}"`)
-  }
-  return new Battery(joltage)
-})
+const parseLine = (line: string): Battery[] =>
+  Array.from(line).map((battery: string) => {
+    const joltage = Number.parseInt(battery, 10)
+    if (Number.isNaN(joltage)) {
+      throw new Error(`invalid joltage: "${battery}"`)
+    }
+    return new Battery(joltage)
+  })
 
 try {
   let nextId = 1
@@ -24,4 +25,5 @@ try {
   console.log('Total output joltage = %d', totalOutputJoltage)
 } catch (err) {
   console.error('Error processling input: %s', err instanceof Error ? err.message : String(err))
+  process.exit(-1)
 }

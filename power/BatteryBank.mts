@@ -23,7 +23,9 @@ class BatteryBank {
         throw new Error('no joltage found')
       }
 
-      const idx = availableBatteries.findIndex(({ joltage }: Battery): boolean => joltage === maxJoltage.joltage)
+      const idx = availableBatteries.findIndex(
+        ({ joltage }: Battery): boolean => joltage === maxJoltage.joltage,
+      )
       if (idx < 0) {
         throw new Error('joltage does not exist in bank')
       }
