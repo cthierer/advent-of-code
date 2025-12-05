@@ -62,7 +62,13 @@ try {
     }
   }
 
+  let numValidIds = 0
+  for (const range of freshIngredientRanges) {
+    numValidIds += range.size
+  }
+
   console.log('Num. fresh ingredients: %d', freshIngredients.size)
+  console.log('Num. valid ingredient IDs: %d', numValidIds)
 } catch (err) {
   console.error(
     'Error processing: %s',
