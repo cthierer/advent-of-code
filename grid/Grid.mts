@@ -21,7 +21,7 @@ class Grid<T> {
     return maxColumns
   }
 
-  private at(row: number, col: number): Element<T> {
+  at(row: number, col: number): Element<T> {
     const { rows, spacer } = this
     const value = rows[row]?.[col] ?? spacer
     return new Element(col, row, value)
@@ -66,6 +66,11 @@ class Grid<T> {
     }
 
     return adjacent
+  }
+
+  remove({ row, col }: Element<T>) {
+    const { spacer } = this
+    this.rows[row][col] = spacer
   }
 
   toString(): string {

@@ -26,16 +26,30 @@ try {
     grid.addRow(parseLine(line))
   }
 
-  let fewerThanFourAdjacent: Element<GridElement>[] = []
-  for (const element of grid) {
-    const adjacent = grid.getAdjacent(element)
-    const numAdjacent = adjacent.filter(({ value }) => value === ROLL).length
-    if (numAdjacent < 4) {
-      fewerThanFourAdjacent = [...fewerThanFourAdjacent, element]
-    }
-  }
+  let totalRemoved = 0
+  let numRemoved = 0
+  do {
+    let toRemove: Element<GridElement>[] = []
 
-  console.log('Accessible rolls: %d', fewerThanFourAdjacent.length)
+    for (const element of grid) {
+      const adjacent = grid.getAdjacent(element)
+      const numAdjacent = adjacent.filter(({ value }) => value === ROLL).length
+      if (numAdjacent < 4) {
+        toRemove = [...toRemove, element]
+      }
+    }
+
+    for (const element of toRemove) {
+      grid.remove(element)
+    }
+
+    numRemoved = toRemove.length
+    totalRemoved += numRemoved
+
+    console.log('Removing rolls: %d', numRemoved)
+  } while (numRemoved > 0)
+
+  console.log('Total rolls removed: %d', totalRemoved)
 } catch (err) {
   console.error(
     'Error processing input: %s',
