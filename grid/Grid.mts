@@ -1,0 +1,90 @@
+import Element from './Element.mts'
+
+class Grid<T> {
+  private spacer: T
+
+  private maxColumns: number = 0
+
+  private rows: T[][] = []
+
+  constructor(spacer: T) {
+    this.spacer = spacer
+  }
+
+  get height(): number {
+    const { rows } = this
+    return rows.length
+  }
+
+  get width(): number {
+    const { maxColumns } = this
+    return maxColumns
+  }
+
+  private at(row: number, col: number): Element<T> {
+    const { rows, spacer } = this
+    const value = rows[row]?.[col] ?? spacer
+    return new Element(col, row, value)
+  }
+
+  addRow(row: T[]) {
+    const { maxColumns, rows } = this
+    if (maxColumns < row.length) {
+      this.maxColumns = row.length
+    }
+    this.rows = [...rows, row]
+  }
+
+  getAdjacent({ col, row }: Element<T>): Element<T>[] {
+    const { height, width } = this
+
+    let adjacent: Element<T>[] = []
+    for (let rowIdx = row - 1; rowIdx <= row + 1; rowIdx++) {
+      if (rowIdx < 0) {
+        continue
+      }
+
+      if (rowIdx > height) {
+        continue
+      }
+
+      for (let colIdx = col - 1; colIdx <= col + 1; colIdx++) {
+        if (colIdx < 0) {
+          continue
+        }
+
+        if (colIdx > width) {
+          continue
+        }
+
+        if (colIdx === col && rowIdx === row) {
+          continue
+        }
+
+        adjacent = [...adjacent, this.at(rowIdx, colIdx)]
+      }
+    }
+
+    return adjacent
+  }
+
+  toString(): string {
+    const { rows } = this
+    return rows.map(row => row.join(' ')).join('\n')
+  }
+
+  *[Symbol.iterator]() {
+    const { height, width, spacer } = this
+    for (let row = 0; row < height; row++) {
+      for (let col = 0; col < width; col++) {
+        const element = this.at(row, col)
+        if (element.value === spacer) {
+          continue
+        }
+        yield element
+      }
+    }
+  }
+}
+
+export default Grid
