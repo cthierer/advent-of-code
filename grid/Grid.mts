@@ -35,6 +35,21 @@ class Grid<T> {
     this.rows = [...rows, row]
   }
 
+  col(col: number): Element<T>[] {
+    const { width } = this
+    if (col >= width) {
+      throw new Error(`invalid column index, out of bounds: ${col}`)
+    }
+
+    const { height } = this
+    let values: Element<T>[] = []
+    for (let row = 0; row < height; row++) {
+      values = values.concat(this.at(row, col))
+    }
+
+    return values
+  }
+
   getAdjacent({ col, row }: Element<T>): Element<T>[] {
     const { height, width } = this
 
