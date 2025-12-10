@@ -1,6 +1,11 @@
 import Coordinates from '../grid/Coordinates.mts'
-import Manifold from './Manifold.mts'
-import { isSplitter, isStartingPoint, type ManifoldElementState } from './ManifoldElementState.mts'
+import Grid from '../grid/Grid.mts'
+import {
+  isBeam,
+  isSplitter,
+  isStartingPoint,
+  type ManifoldElementState,
+} from './ManifoldElementState.mts'
 
 abstract class ManifoldElement {
   readonly state: ManifoldElementState
@@ -19,6 +24,11 @@ abstract class ManifoldElement {
     return numTimesProcessed > 0
   }
 
+  isBeam(): boolean {
+    const { state } = this
+    return isBeam(state)
+  }
+
   isStartingPoint(): boolean {
     const { state } = this
     return isStartingPoint(state)
@@ -34,9 +44,12 @@ abstract class ManifoldElement {
     return String(state)
   }
 
-  protected abstract processBeam(currCoordinates: Coordinates, last: Manifold): Manifold
+  protected abstract processBeam(
+    currCoordinates: Coordinates,
+    last: Grid<ManifoldElement>,
+  ): Grid<ManifoldElement>
 
-  process(currCoordinates: Coordinates, last: Manifold): Manifold {
+  process(currCoordinates: Coordinates, last: Grid<ManifoldElement>): Grid<ManifoldElement> {
     const { numTimesProcessed, maxTimesToProcess } = this
     if (numTimesProcessed >= maxTimesToProcess) {
       return last

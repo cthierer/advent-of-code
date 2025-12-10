@@ -27,6 +27,8 @@ export const fromValue = (value: string): ManifoldElementState => {
   }
 }
 
+export const isBeam = (value: ManifoldElementState): boolean => value === ManifoldElementState.Beam
+
 export const isStartingPoint = (value: ManifoldElementState): boolean =>
   value === ManifoldElementState.Start
 

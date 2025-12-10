@@ -21,17 +21,6 @@ class Manifold {
     )
   }
 
-  at(coordinates: Coordinates): ManifoldElement {
-    const { grid } = this
-    const { value } = grid.at(coordinates)
-    return value
-  }
-
-  set(coordinates: Coordinates, element: ManifoldElement) {
-    const { grid } = this
-    grid.set(coordinates, element)
-  }
-
   copy(): Manifold {
     const copy = new Manifold()
     copy.grid = this.grid.copy()
@@ -39,13 +28,13 @@ class Manifold {
   }
 
   process(): Manifold {
-    const { startingPoints } = this
+    const { startingPoints, grid: startingGrid } = this
 
-    let manifold = this.copy()
+    let grid = startingGrid.copy()
     for (const startingCoordinate of startingPoints) {
       try {
-        const element = manifold.at(startingCoordinate)
-        manifold = element.process(startingCoordinate, manifold)
+        const { value: element } = grid.at(startingCoordinate)
+        grid = element.process(startingCoordinate, grid)
       } catch (err) {
         if (err instanceof OutOfBoundsError) {
           continue
@@ -54,7 +43,14 @@ class Manifold {
       }
     }
 
+    const manifold = this.copy()
+    manifold.grid = grid
+
     return manifold
+  }
+
+  splitters(): ManifoldElement[] {
+    return Array.from(this).filter(element => element.isSplitter())
   }
 
   toString(): string {

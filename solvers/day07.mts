@@ -31,7 +31,7 @@ try {
   }
 
   const result = manifold.process()
-  const splitters = Array.from(result).filter(element => element.isSplitter())
+  const splitters = result.splitters()
   const usedSplitters = splitters.filter(({ used }) => used)
 
   console.log('Starting manifold:\n==================\n%s\n', manifold)
