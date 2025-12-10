@@ -55,7 +55,7 @@ const toDigits = ({ value, row, col }: Element<string>): string[] => {
   return Array.from(value).map(valueStr => valueStr.trim())
 }
 
-const rotate = (last: string[][], values: string[], row: number, arr: string[][]): string[][] => {
+const rotate = (last: string[][], values: string[]): string[][] => {
   for (let col = 0; col < values.length; col++) {
     const value = values[values.length - col - 1]
 

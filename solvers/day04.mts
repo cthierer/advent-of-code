@@ -40,7 +40,7 @@ try {
     }
 
     for (const element of toRemove) {
-      grid.remove(element)
+      grid.remove(element.coordinates)
     }
 
     numRemoved = toRemove.length

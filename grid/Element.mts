@@ -1,14 +1,27 @@
-class Element<T> {
-  readonly col: number
+import Coordinates from './Coordinates.mts'
 
-  readonly row: number
+class Element<T> {
+  readonly coordinates: Coordinates
 
   readonly value: T
 
-  constructor(col: number, row: number, value: T) {
-    this.col = col
-    this.row = row
+  constructor(coordinates: Coordinates, value: T) {
+    this.coordinates = coordinates
     this.value = value
+  }
+
+  get col(): number {
+    const {
+      coordinates: { col },
+    } = this
+    return col
+  }
+
+  get row(): number {
+    const {
+      coordinates: { row },
+    } = this
+    return row
   }
 }
 

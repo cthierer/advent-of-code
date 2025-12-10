@@ -1,4 +1,6 @@
+import Coordinates from './Coordinates.mts'
 import Element from './Element.mts'
+import OutOfBoundsError from './OutOfBoundsError.mts'
 
 class Grid<T> {
   private spacer: T
@@ -21,10 +23,26 @@ class Grid<T> {
     return maxColumns
   }
 
-  at(row: number, col: number): Element<T> {
+  at(coordinates: Coordinates): Element<T> {
+    if (!this.within(coordinates)) {
+      throw new OutOfBoundsError(this, coordinates)
+    }
+
     const { rows, spacer } = this
+    const { row, col } = coordinates
     const value = rows[row]?.[col] ?? spacer
-    return new Element(col, row, value)
+
+    return new Element(coordinates, value)
+  }
+
+  get(find: T): Element<T> | null {
+    for (const element of this) {
+      const { value } = element
+      if (value === find) {
+        return element
+      }
+    }
+    return null
   }
 
   addRow(row: T[]) {
@@ -44,10 +62,17 @@ class Grid<T> {
     const { height } = this
     let values: Element<T>[] = []
     for (let row = 0; row < height; row++) {
-      values = values.concat(this.at(row, col))
+      values = values.concat(this.at(new Coordinates(col, row)))
     }
 
     return values
+  }
+
+  copy(): Grid<T> {
+    const copy = new Grid(this.spacer)
+    copy.maxColumns = this.maxColumns
+    copy.rows = this.rows.map(row => [...row])
+    return copy
   }
 
   getAdjacent({ col, row }: Element<T>): Element<T>[] {
@@ -76,16 +101,27 @@ class Grid<T> {
           continue
         }
 
-        adjacent = [...adjacent, this.at(rowIdx, colIdx)]
+        adjacent = [...adjacent, this.at(new Coordinates(colIdx, rowIdx))]
       }
     }
 
     return adjacent
   }
 
-  remove({ row, col }: Element<T>) {
+  remove({ row, col }: Coordinates) {
     const { spacer } = this
     this.rows[row][col] = spacer
+  }
+
+  set(coordinates: Coordinates, element: T) {
+    if (!this.within(coordinates)) {
+      throw new OutOfBoundsError(this, coordinates)
+    }
+
+    const { col, row } = coordinates
+
+    this.rows[row] = this.rows[row] ?? []
+    this.rows[row][col] = element
   }
 
   toString(): string {
@@ -93,11 +129,16 @@ class Grid<T> {
     return rows.map(row => row.join(' ')).join('\n')
   }
 
+  within({ col, row }: Coordinates): boolean {
+    const { width, height } = this
+    return col >= 0 && col < width && row >= 0 && row < height
+  }
+
   *[Symbol.iterator]() {
     const { height, width, spacer } = this
     for (let row = 0; row < height; row++) {
       for (let col = 0; col < width; col++) {
-        const element = this.at(row, col)
+        const element = this.at(new Coordinates(col, row))
         if (element.value === spacer) {
           continue
         }
