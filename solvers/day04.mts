@@ -32,7 +32,7 @@ try {
     let toRemove: Element<GridElement>[] = []
 
     for (const element of grid) {
-      const adjacent = grid.getAdjacent(element)
+      const adjacent = grid.adjacent(element.coordinates)
       const numAdjacent = adjacent.filter(({ value }) => value === ROLL).length
       if (numAdjacent < 4) {
         toRemove = [...toRemove, element]

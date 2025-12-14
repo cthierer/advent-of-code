@@ -5,20 +5,26 @@ import ManifoldElement from './ManifoldElement.mts'
 import ManifoldElementState from './ManifoldElementState.mts'
 
 class Space extends ManifoldElement {
-  constructor() {
-    super(ManifoldElementState.Space)
+  constructor(coorindates: Coordinates) {
+    super(ManifoldElementState.Space, coorindates)
   }
 
-  protected processBeam(
-    currCoordinates: Coordinates,
-    last: Grid<ManifoldElement>,
-  ): Grid<ManifoldElement> {
-    const beam = new Beam()
+  copy(): Space {
+    const { coordinates } = this
+    const copy = new Space(coordinates)
+    this.copyState(copy)
+    return copy
+  }
 
-    const next = last.copy()
-    next.set(currCoordinates, beam)
+  protected countTimlines(grid: Grid<ManifoldElement | null>): number {
+    return 0
+  }
 
-    return beam.process(currCoordinates, next)
+  protected processBeam(grid: Grid<ManifoldElement | null>): Grid<ManifoldElement | null> {
+    const { coordinates } = this
+    const beam = new Beam(coordinates)
+    grid.set(coordinates, beam)
+    return beam.process(grid)
   }
 }
 

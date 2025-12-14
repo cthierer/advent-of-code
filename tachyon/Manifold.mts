@@ -1,28 +1,75 @@
 import Coordinates from '../grid/Coordinates.mts'
 import Grid from '../grid/Grid.mts'
-import OutOfBoundsError from '../grid/OutOfBoundsError.mts'
 import ManifoldElement from './ManifoldElement.mts'
-import Space from './Space.mts'
 
 class Manifold {
   private startingPoints: Coordinates[] = []
 
-  private grid: Grid<ManifoldElement> = new Grid(new Space())
+  private grid: Grid<ManifoldElement | null>
 
-  add(elements: ManifoldElement[]) {
+  constructor(numCols: number = 0) {
+    this.grid = new Grid<ManifoldElement | null>(null, 0, numCols)
+  }
+
+  get numCols(): number {
+    const { grid } = this
+    return grid.width
+  }
+
+  set numCols(newValue: number) {
+    if (newValue < 0) {
+      throw new Error(`column count must be greater non-negative, got "${newValue}"`)
+    }
+
+    const { numCols } = this
+    if (newValue === numCols) {
+      return
+    }
+
+    const { numRows, grid } = this
+    const newGrid = new Grid<ManifoldElement | null>(null, numRows, newValue)
+    for (const { coordinates, value } of grid) {
+      if (coordinates.col >= newValue) {
+        continue
+      }
+      newGrid.set(coordinates, value)
+    }
+
+    this.grid = newGrid
+  }
+
+  get numRows(): number {
+    const { grid } = this
+    return grid.height
+  }
+
+  private appendEmptyRow() {
+    const { numCols, grid } = this
+    const emptyRow = []
+    for (let col = 0; col < numCols; col++) {
+      emptyRow[col] = null
+    }
+    grid.addRow(emptyRow)
+  }
+
+  add(element: ManifoldElement) {
     const { grid, startingPoints } = this
-    grid.addRow(elements)
-    this.startingPoints = startingPoints.concat(
-      elements
-        .filter(value => value.isStartingPoint())
-        .map(value => grid.get(value))
-        .filter(value => !!value)
-        .map(({ coordinates }) => coordinates),
-    )
+    const { coordinates } = element
+
+    if (coordinates.row >= grid.height) {
+      this.appendEmptyRow()
+    }
+
+    grid.set(coordinates, element)
+
+    if (element.isStartingPoint()) {
+      this.startingPoints = startingPoints.concat(element.coordinates)
+    }
   }
 
   copy(): Manifold {
-    const copy = new Manifold()
+    const { numCols } = this
+    const copy = new Manifold(numCols)
     copy.grid = this.grid.copy()
     return copy
   }
@@ -32,15 +79,12 @@ class Manifold {
 
     let grid = startingGrid.copy()
     for (const startingCoordinate of startingPoints) {
-      try {
-        const { value: element } = grid.at(startingCoordinate)
-        grid = element.process(startingCoordinate, grid)
-      } catch (err) {
-        if (err instanceof OutOfBoundsError) {
-          continue
-        }
-        throw err
+      const { value: element } = grid.at(startingCoordinate)
+      if (!element) {
+        continue
       }
+
+      grid = element.process(grid)
     }
 
     const manifold = this.copy()
@@ -50,7 +94,27 @@ class Manifold {
   }
 
   splitters(): ManifoldElement[] {
-    return Array.from(this).filter(element => element.isSplitter())
+    return Array.from(this)
+      .filter(element => !!element && element.isSplitter())
+      .filter(value => !!value)
+  }
+
+  timelines(): Grid<number> {
+    const { numRows, numCols, grid } = this
+    const timelines = new Grid<number>(0, numRows, numCols)
+
+    for (const { coordinates, value } of grid) {
+      timelines.set(coordinates, value ? value.numTimelines(grid) : 0)
+    }
+
+    return timelines
+  }
+
+  numTimelines(): number {
+    const { grid } = this
+    const lastRow = grid.row(grid.height - 1).map(({ value }) => value)
+    const beams = lastRow.filter(value => !!value && value.isBeam()).filter(value => !!value)
+    return beams.reduce((sum, beam) => sum + beam.numTimelines(grid), 0)
   }
 
   toString(): string {
@@ -61,6 +125,9 @@ class Manifold {
   *[Symbol.iterator]() {
     const { grid } = this
     for (const { value: element } of grid) {
+      if (!element) {
+        continue
+      }
       yield element
     }
   }

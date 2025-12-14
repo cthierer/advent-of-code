@@ -9,8 +9,16 @@ class Grid<T> {
 
   private rows: T[][] = []
 
-  constructor(spacer: T) {
+  constructor(spacer: T, height: number = 0, width: number = 0) {
     this.spacer = spacer
+    this.maxColumns = width
+
+    for (let row = 0; row < height; row += 1) {
+      for (let col = 0; col < width; col += 1) {
+        this.rows[row] = this.rows[row] ?? []
+        this.rows[row][col] = spacer
+      }
+    }
   }
 
   get height(): number {
@@ -53,16 +61,16 @@ class Grid<T> {
     this.rows = [...rows, row]
   }
 
-  col(col: number): Element<T>[] {
+  col(idx: number): Element<T>[] {
     const { width } = this
-    if (col >= width) {
-      throw new Error(`invalid column index, out of bounds: ${col}`)
+    if (idx >= width) {
+      throw new Error(`invalid column index, out of bounds: ${idx}`)
     }
 
     const { height } = this
     let values: Element<T>[] = []
     for (let row = 0; row < height; row++) {
-      values = values.concat(this.at(new Coordinates(col, row)))
+      values = values.concat(this.at(new Coordinates(idx, row)))
     }
 
     return values
@@ -71,11 +79,23 @@ class Grid<T> {
   copy(): Grid<T> {
     const copy = new Grid(this.spacer)
     copy.maxColumns = this.maxColumns
-    copy.rows = this.rows.map(row => [...row])
+    copy.rows = this.rows.map(row =>
+      row.map(element => {
+        if (
+          typeof element === 'object' &&
+          element !== null &&
+          'copy' in element &&
+          typeof element.copy === 'function'
+        ) {
+          return element.copy()
+        }
+        return element
+      }),
+    )
     return copy
   }
 
-  getAdjacent({ col, row }: Element<T>): Element<T>[] {
+  adjacent({ col, row }: Coordinates): Element<T>[] {
     const { height, width } = this
 
     let adjacent: Element<T>[] = []
@@ -113,6 +133,16 @@ class Grid<T> {
     this.rows[row][col] = spacer
   }
 
+  row(idx: number): Element<T>[] {
+    const { height } = this
+    if (idx >= height) {
+      throw new Error(`invalid row index, out of bounds: ${idx}`)
+    }
+
+    const { rows } = this
+    return rows[idx].map((value, col) => new Element(new Coordinates(col, idx), value))
+  }
+
   set(coordinates: Coordinates, element: T) {
     if (!this.within(coordinates)) {
       throw new OutOfBoundsError(this, coordinates)
@@ -126,7 +156,18 @@ class Grid<T> {
 
   toString(): string {
     const { rows } = this
-    return rows.map(row => row.join(' ')).join('\n')
+    return rows
+      .map(row =>
+        row
+          .map(value => {
+            if (typeof value === 'number') {
+              return value.toString(16)
+            }
+            return String(value)
+          })
+          .join(' '),
+      )
+      .join('\n')
   }
 
   within({ col, row }: Coordinates): boolean {

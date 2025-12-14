@@ -1,28 +1,37 @@
 import Coordinates from '../grid/Coordinates.mts'
 import Grid from '../grid/Grid.mts'
-import OutOfBoundsError from '../grid/OutOfBoundsError.mts'
 import ManifoldElement from './ManifoldElement.mts'
 import ManifoldElementState from './ManifoldElementState.mts'
 
 class Start extends ManifoldElement {
-  constructor() {
-    super(ManifoldElementState.Start)
+  constructor(coordinates: Coordinates) {
+    super(ManifoldElementState.Start, coordinates)
   }
 
-  protected processBeam(
-    currCoordinates: Coordinates,
-    last: Grid<ManifoldElement>,
-  ): Grid<ManifoldElement> {
-    const downOne = currCoordinates.translate(0, 1)
-    try {
-      const { value: spreadTo } = last.at(downOne)
-      return spreadTo.process(downOne, last)
-    } catch (err) {
-      if (err instanceof OutOfBoundsError) {
-        return last
-      }
-      throw err
+  copy(): Start {
+    const { coordinates } = this
+    const copy = new Start(coordinates)
+    this.copyState(copy)
+    return copy
+  }
+
+  protected countTimlines(grid: Grid<ManifoldElement | null>): number {
+    return 1
+  }
+
+  protected processBeam(grid: Grid<ManifoldElement | null>): Grid<ManifoldElement | null> {
+    const { coordinates } = this
+    const downOne = coordinates.translate(0, 1)
+    if (!grid.within(downOne)) {
+      return grid
     }
+
+    const { value: spreadTo } = grid.at(downOne)
+    if (!spreadTo) {
+      return grid
+    }
+
+    return spreadTo.process(grid)
   }
 }
 
